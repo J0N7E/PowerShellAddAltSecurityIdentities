@@ -15,7 +15,7 @@
 
 param
 (
-    $IssuerCN = "Certezza Issuing CA v2",
+    $IssuerCN = "Issuing CA v2",
     $DaysBack = 7
 )
 
