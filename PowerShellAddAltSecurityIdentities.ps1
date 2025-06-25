@@ -1,10 +1,11 @@
 <#
  .SYNOPSIS
-    PowerShell AD Strong Certificate Mapping
+    PowerShell Strong Certificate Mapping (altSecurityIdentities)
 
  .DESCRIPTION
-    Checks security log for missing strong mappings from specific issuer
+    Checks security log for missing strong mappings from a specific issuer
     Add certificate serial number from event to users altSecurityIdentities attribute
+    View all users with set altSecurityIdentities and their mapped serial numbers
 
  .NOTES
     AUTHOR Jonas Henriksson
@@ -13,7 +14,7 @@
     https://github.com/J0N7E
 #>
 
-[cmdletbinding(DefaultParameterSetName='Get')]
+[cmdletbinding(DefaultParameterSetName='Set')]
 
 param
 (
@@ -67,8 +68,6 @@ function Reverse-String
 
 # Get BaseDN
 $BaseDN = Get-ADDomain | Select-Object -ExpandProperty DistinguishedName
-
-
 
 #######
 # Main
@@ -157,10 +156,10 @@ switch ($PsCmdlet.ParameterSetName)
             $EventXml = ([xml]$Event.ToXml()).Event
 
             # Get username
-            $Username = $EventXml.EventData.Data.Item(0).'#Text'
+            $Username = $EventXml.EventData.Data[0].'#Text'
 
             # Get serialnumber
-            $SerialNumber = $EventXml.EventData.Data.Item(3).'#Text'
+            $SerialNumber = $EventXml.EventData.Data[3].'#Text'
 
             if ($Username -and $SerialNumber)
             {
@@ -190,8 +189,8 @@ switch ($PsCmdlet.ParameterSetName)
 # SIG # Begin signature block
 # MIIejQYJKoZIhvcNAQcCoIIefjCCHnoCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUPHPCR2sBwvcwarE5LAtdGt5f
-# JRmgghgOMIIFBzCCAu+gAwIBAgIQdFzLNL2pfZhJwaOXpCuimDANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUy7zQdrEhO6v6gfwa/BEdqfXy
+# 2SOgghgOMIIFBzCCAu+gAwIBAgIQdFzLNL2pfZhJwaOXpCuimDANBgkqhkiG9w0B
 # AQsFADAQMQ4wDAYDVQQDDAVKME43RTAeFw0yMzA5MDcxODU5NDVaFw0yODA5MDcx
 # OTA5NDRaMBAxDjAMBgNVBAMMBUowTjdFMIICIjANBgkqhkiG9w0BAQEFAAOCAg8A
 # MIICCgKCAgEA0cNYCTtcJ6XUSG6laNYH7JzFfJMTiQafxQ1dV8cjdJ4ysJXAOs8r
@@ -322,34 +321,34 @@ switch ($PsCmdlet.ParameterSetName)
 # 4Q1zZKDyHcp4VQJLu2kWTsKsOqQxggXpMIIF5QIBATAkMBAxDjAMBgNVBAMMBUow
 # TjdFAhB0XMs0val9mEnBo5ekK6KYMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRrUN/EWN34tPMj
-# RuWn38pUXkp6FzANBgkqhkiG9w0BAQEFAASCAgAyoIlNVw4ejwfJyb+fqDqzFthk
-# Jm9poYwujFxGXnnJYmjfoX6fQ87me5WqfDi4sw9e1u79MQuubge5niFYD5wjKsHE
-# 0ZuLJ2M8EBWtxuw3fHF+XvUt8ov69UlwXlC6E7nFIaeQm78vEX3fvJmzBjtZIlK4
-# Nxcb6NQu3zd5OXn8wF6OB7xb7mnJVWWi1XRgyhjLJE4hJgUaFBGFCWrxFJxB9ITE
-# ae4hDEkIrCntD8z1A3kYZ4VI78izYhDia73773nUWJdwRUBpKCmg8LymmwGSHbrP
-# R5oiUw1zWVbhgTMivORIEltbNQS91/vZ1npZ4njJmUvacIxnVx36gW8jGZKN4S1N
-# LCoSKvSkct6yG4dF8kO938xlEQP7UgU0K7BIfSbESf3ZJXiELwxArzmbjbNPXi7C
-# QM0lnQ+GqqmKxh9wnziXcTLHv2eia3T3g/ltXW7FFnEgk+npUkPdk1W2n7smJzmk
-# SG40KHPIIpY+gIp8AVm8UYfLapg/eKsUBWcA6Mgxh7RDTLaTaQYjAtEoQrHFXaWn
-# eWUl9Vci94ANm682AVItgi54uuCJe9XTz4Q4CL5IAudV2YuwoCYtq6jKw75SoCK1
-# w+aqOpy1Z3FyflTpityRtbgtBCb+NxfbpuR9uOo1OFSXWRVC5kb2VpMmwWz9+sxb
-# In27RYKW72okSUC5JKGCAyAwggMcBgkqhkiG9w0BCQYxggMNMIIDCQIBATB3MGMx
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQ/HD2Pl0pASNki
+# Uu/NXTfC2SSvQjANBgkqhkiG9w0BAQEFAASCAgA0JnQ/4/ex1hnNd2RCAau0KAFb
+# 5cScSn2LfXpN1EB1sjB11836jR1KmizecUu4FYH3tzcnbDBg7kcu8syeMoEP+Uxx
+# h8LVkFUrLDeOoBSfT3+oGiP12/x/8ZHKGgqIjWIEFyxIaUCGcV5KGe3E5TqTZblR
+# JejL0lSrYiQxUzT3rizk+0VtLDoF7MNQskDQsptN2rrxhQzUQ1XTdlAky7cwBtql
+# Wo8xJcQ/3SEhLDKsgVIU1Vy6JdJQkKcLml+86uX4E+R3AhMGfhy38LONzAs5kEgN
+# cTa5KWtVV84Ql9hxBoJiagaW+JbfdEcEXdoX7CXC3bOuFzEvfU8IESXbA2dafoXE
+# wMTx3mG4KcVUJRkUsoBoi8yqUQHTrqvQTGC+u4aFOe/I1I0FuRIZGvZYn3MCmarf
+# PFleRkQbc9Fl07EXNmZrOemQh9MNiWTYqNq4vh6wS2DO60JjgOuhAp4LMEeQygXL
+# DG0M4MCgPj+YUOni2wJrDYvqU7GQtUCtOIeMGEChan76zTKUlnyII4mMf3RdXppt
+# t6ry3DvnkA0b3XkNrriKQkK2HenVLXz3G0SNDHYD5eSSsAMY8yehRjqNNolaWwj9
+# 5SlCnH1lvJxJne98YciP71xC9FzyWV1OBcOjsNg7n769tT1t0wnK04gvlB1wB0N7
+# KV4cFSAqoFSRf8EP2aGCAyAwggMcBgkqhkiG9w0BCQYxggMNMIIDCQIBATB3MGMx
 # CzAJBgNVBAYTAlVTMRcwFQYDVQQKEw5EaWdpQ2VydCwgSW5jLjE7MDkGA1UEAxMy
 # RGlnaUNlcnQgVHJ1c3RlZCBHNCBSU0E0MDk2IFNIQTI1NiBUaW1lU3RhbXBpbmcg
 # Q0ECEAuuZrxaun+Vh8b56QTjMwQwDQYJYIZIAWUDBAIBBQCgaTAYBgkqhkiG9w0B
-# CQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0yNTA2MjUxNjAwMDFaMC8G
-# CSqGSIb3DQEJBDEiBCBxLVl2jor2CF2sJfk7a60CnvGfpnjS3DrYf1wxrRTOZTAN
-# BgkqhkiG9w0BAQEFAASCAgBXI2vTrSx31wVnw+gCqusNsx4iRsFuTI5nWHaPeQYH
-# OVp2fOldaCWuUq1PBVj9qCZ2JLuJ6qR49IYt43domZKP5EqW8J+up+39W6lF1G+d
-# tJWUMxHu+oiuVA3lxd+weQyWg8BoEKyz8FbRxSXQdaXrIJ68WBQkdORQExcGg4er
-# x0KnbD1MOJPRtOB2HYwx1ZDvYJ4PWSmvCec8bqvWNklZvtxATK1ykpadWDYejZq6
-# pNQrztIHJpR7EZyPFUHbLydpKJVX29DM34eJcZpQ8PHN8EFPd+0MUt8DWsQxccBT
-# flIyP5D3l8P3X9bY17xBNhYRSAuWIvLSOXncgWe7dYgy3AtgyArcAqtZhFLRfJ+o
-# BdtGt57OWdvTHWgBdtehGkzGNCX2iCemIPK9XtI3/tb5joe4bpfdxdUxG2wYJOg8
-# EB712FvU/apQzHm3CiAPMv5Ssbzz0Axu8MmP9LPIic/8hrDhDSFzehUWdoogSPDI
-# 5YgCCMNo97m8B6XzepwoOY4OnsShJJJjhlQCwRpBr1O7ARRU2M/jmwphF1ZPJF/G
-# yRJuiiOOyGmMoAZ9xIFjBw6OEK5Myg8xZ1ZYfgRJo1j+jpIw8GHSvB1fLj50gqMl
-# Tto2uIBApji/5j1BHAk8kwVgBW7awNG8PSDp0jD3hyXiXRJvKM2XmOUEgPu+I1S0
-# 1w==
+# CQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0yNTA2MjUxNzAwMDJaMC8G
+# CSqGSIb3DQEJBDEiBCDKnrhlnHKobRJyPT8PfYmkF+VP6D2aZq9a75c7z2z/ezAN
+# BgkqhkiG9w0BAQEFAASCAgCsVU9qhLc4M5ySFxEirSRrP+fZZmFTvjsSO1EimEgn
+# C6Y43r8PL81ksCKfdDSYddByzwyPCcuRUHUNv+uxw1TxmiR3JNq8yTwfaN7ULqXn
+# 44EstUfzCzybyu/s1E/j7MClWvYRJnTWRxZXb05eulKiKDl+7MdL9O/eN1wjf0VR
+# HozJPfIsI4i1SZ3lrYoq2S9YH/Y2vUiW+vfKzfLzCb8mBCoidZh8BEV+V/q6eT7x
+# khMuSMXke+r/DxmiqYRfC5E/MIpljng887tyBs5Pk/UnepLgb9E5f7uqbs3/QJUJ
+# MuLOEayM+JM6F5FQfyOa4+FfGu5VrA7c/qrIDe+/db79xDAdF9nNWRhKU0MaX73m
+# sXc8Q7OuBWcmGFJ+3cQRTpHdGIcmJ/IeANwf23Cw0PjT1ZGrkuWnT71SJlw1o2uO
+# fTaEOmNdRxU17F0umX7ztT1BOiyWWIyahr8/vfNUeN9kaQh+VS1mrYAcDoAoncqs
+# l6kO4ShhvwjNO01I1UGzKF3TgwfP/ZcwAx61VuKLCKEF1oZ+tKHEgOqyqZGMweb1
+# hzIjpjH+mnimilMFpaly3v0YHhj/FCBqQd0vzQt7Zv03vWbtCOgQco1u1VNOu/Wy
+# /EJ5hDiWLDfKxdGAbSZfauyVuiTDLW+9Lp4Sr8Hgt2UrmMT19dcKOjgT2lZCClaa
+# mg==
 # SIG # End signature block
