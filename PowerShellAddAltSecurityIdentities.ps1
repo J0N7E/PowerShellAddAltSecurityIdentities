@@ -66,14 +66,21 @@ $ReversedBaseDN = Reverse-String -InputObject $BaseDN
 # Days to miliseconds
 $EventTime = $DaysBack * 86400000
 
-# Get Issuer CN
-$IssuerCN = (certutil) | Where-Object {
-    $_ -match "^  (?:Name|Namn):.*(?:``|`")(.*)(?:'|`")"
-} | ForEach-Object { "`"$($Matches[1])`"" }
-
+# Get
 if (-not $IssuerCN)
 {
-    Write-Error -Message "Unable to find Issuer CN, please use the -IssuerCN parameter."
+    # Get Issuer CN
+    $IssuerCN = (certutil) | Where-Object {
+        $_ -match "^  (?:Name|Namn):.*(?:``|`")(.*)(?:``|`")$"
+    } | ForEach-Object { $Matches[1] }
+
+    if (-not $IssuerCN)
+    {
+        Write-Warning -Message "Unable to find Issuer CN, please use the -IssuerCN parameter."
+        return
+    }
+
+    Write-Verbose -Message "Looking for events with Issuer = `"$IssuerCN`"" -Verbose
 }
 
 # Event XML
@@ -133,8 +140,8 @@ foreach ($Event in $SystemKdcsvcEvents)
 # SIG # Begin signature block
 # MIIejQYJKoZIhvcNAQcCoIIefjCCHnoCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUpmSFqMNcPHO7AJgdfb5uwc5s
-# aoygghgOMIIFBzCCAu+gAwIBAgIQdFzLNL2pfZhJwaOXpCuimDANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUM3X26hwRIQZwic4MLTgMxHMo
+# PPigghgOMIIFBzCCAu+gAwIBAgIQdFzLNL2pfZhJwaOXpCuimDANBgkqhkiG9w0B
 # AQsFADAQMQ4wDAYDVQQDDAVKME43RTAeFw0yMzA5MDcxODU5NDVaFw0yODA5MDcx
 # OTA5NDRaMBAxDjAMBgNVBAMMBUowTjdFMIICIjANBgkqhkiG9w0BAQEFAAOCAg8A
 # MIICCgKCAgEA0cNYCTtcJ6XUSG6laNYH7JzFfJMTiQafxQ1dV8cjdJ4ysJXAOs8r
@@ -265,34 +272,34 @@ foreach ($Event in $SystemKdcsvcEvents)
 # 4Q1zZKDyHcp4VQJLu2kWTsKsOqQxggXpMIIF5QIBATAkMBAxDjAMBgNVBAMMBUow
 # TjdFAhB0XMs0val9mEnBo5ekK6KYMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSeNtvxz4iCclkV
-# q5MFJ/w6waWzWjANBgkqhkiG9w0BAQEFAASCAgDLHW5atR2eobSBJKku85k5dfWq
-# Ev8NPn9W+nS2vcH7odOS8IJCSZdvl8jWMDDeKHGWtqW+5xnzZGy0tHGXRkrsaiEr
-# rs8hehJLoodnAMaDun9MmDf9ZWZMCGiOEtEP3FeZiZZQ0fDrlcMH62F/5fnmtzPN
-# xxmmAnJ6m3JQm2JhUbfCd+Z6+lD0bhl0CQx9wKWvW4FQVqzRejNTDBd7Ef1qcGEH
-# Bi+XLL0SpKm5/pc9/sig8YiEmxrxYp36xdWRIXo/3wkheMSjMSLeriIAzvbHF6hG
-# v14ttd9RjHtMisenpuhWOHNGklbICGNLZdQO5245Pso3uzxM7JqltdP4BaiID9Yf
-# i13oHZ0e5wpNPZVU1AxUAzHbzP436nhyUjD/MKZO8UcdtsAS9K18STvukQtdh41B
-# soHA4qU3Jdnq1sHysbJ3Knp/w2KZNLOlutSZ62LuAigyr70CWHwkz54YBqTu5xmz
-# j1BaiOSkh/qVsekILIm6ejAd1AHItOwAUa3YMTgelSsBNCHSzUcIo+zEuToaOX58
-# mq9ZrABBeSDY9ijP41VP7ZEs0Xu8yIQyuk3iLgMdL6e5FhTqJmiy0h80ZthjGR7+
-# XEeMMTzSLt/YrkZWxicERaR+CbrZLQI7YWfOFBgZnyhDBllo8Ko65pKeJ33arkhx
-# cWL2qKHsxgEjQpPDqqGCAyAwggMcBgkqhkiG9w0BCQYxggMNMIIDCQIBATB3MGMx
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBROhG4GRHmgl7dj
+# yBGGEyiPiOyXsDANBgkqhkiG9w0BAQEFAASCAgB0IWn0CAigxs/zzizrmoAaFCld
+# ktMDP9r0TEw0NyREtDQnDZL9mMZy7MLS+xYOTWcWwjlE4gwxC61Iy1B6QrQlxFh8
+# fS9qmeIruveHEHBVF6KRb4kvnKsIvGFNNCx/U0ek3KAp1IFinNz3dPye8SdLLnr0
+# KmPBbDu9roLxxqEAkTFz5H/7zRgUvaGi04f/SbJ/HZUF91tZzRHhLfhXjJMGiuSm
+# 5HT0rpw8dX/K1VztcjiZG7Fg3tbKR1Hs3mQDSb8g4uYpF1MOOzmUi3PdLjDb2zJW
+# YuUESKyL9WmOA5ftALeIuHo7ChoCMN/5/tXs342K5++JiQVUrIKdaCUF/+NiGD2e
+# Af04EjkH0DnpFvB4mezPXKPJF6gXzQn3uz6iQnVtOXiCPAWOeoexPxwitE6rzCb2
+# GtSA4CRIXo620hrwBRZcNymSWD57UVnyHFq5l6vZEiaS9MDBsgtYApdE72i0VJJQ
+# rRZUA8Blg/Wx4CIx6h6Mgr/mu4RKRfh7PbFrh8W1YmZ8kcbFS0sZ/AQFM1tt+IvJ
+# nm0G3LplNYsDWFnfJdOxvYcE/ZvVMPEAqaHzgP8qpfZR23Y7djrTKkL5R4OFwV15
+# A4PcYNEekX1jQrJw9NGN9HHZNJK0TSAwpD4K0ZSKCMEOBTeRBNfsDtSsuwRiGiDB
+# TMgmL7zzih8uk1+Hy6GCAyAwggMcBgkqhkiG9w0BCQYxggMNMIIDCQIBATB3MGMx
 # CzAJBgNVBAYTAlVTMRcwFQYDVQQKEw5EaWdpQ2VydCwgSW5jLjE7MDkGA1UEAxMy
 # RGlnaUNlcnQgVHJ1c3RlZCBHNCBSU0E0MDk2IFNIQTI1NiBUaW1lU3RhbXBpbmcg
 # Q0ECEAuuZrxaun+Vh8b56QTjMwQwDQYJYIZIAWUDBAIBBQCgaTAYBgkqhkiG9w0B
-# CQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0yNTA2MjUwOTAwMDJaMC8G
-# CSqGSIb3DQEJBDEiBCDvWDwgOAFktYYDdGPyf9NmpbKEGRZuOuklKdGY3msamzAN
-# BgkqhkiG9w0BAQEFAASCAgBUxe1dqbMHCKHOdQb9UAVkwftilhxAheQssX5valCe
-# QguGxaUHxJCVUxDCV9sPwDDuuCTMDo1SYxiKqPhIvz3nvomfJYrCl6H+PhRA3dmK
-# uepoccCK/4MeynaAmOausQyyaQw702fiM7KTEWipYvijzYi/nVTXhImIvN5owA4i
-# TJuLjXah3Xw21GJKX3EOA4ghKFNyOsKzQ+4+oe4GIRXcUjqAF0LGTPPeZKDMeCZa
-# xsZHTa+Ii60h0zdTYGN8ENGa7Cp70DB4R2Eb1FZK7gtJBlJ1HOIQLrMAjoJl8+ou
-# iybiDaomAO31ggfby2LDnGenKY1g+jueIFDCyzKAT9kNq1VN5K3XQyHQ1wHkDA3+
-# 2pCwylRf0tUt2fzE2ZKc5xP4RU3NvswvkOiHub03qN1PdzPn5144C8iptUGMjs/u
-# z3I5yi+au0lB8gE6W3nqYXGxsVUvREYNW8+jO6Apt5X9bGZdvTdPOXlm9Xgjw6oa
-# Dl5SeNRarMfpr3PnM+fh3BetocjzO96GQIcOPuHxTVPdZYyiiNmsNXrY1Bu/Y1Hh
-# LvCsXk+4az0QK22NV2NdtW5QSEjAnIGTqI7CP7zoHYsCcZVFS14JwwRuZ8l1SKuh
-# Lkyu7kMvYYrGsGh2vFt41xmQ8rNp+6e48UJvlUUS8jB3B+NUaB2s/GM10f7Mjh9f
-# Zw==
+# CQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0yNTA2MjUxMDAwMDJaMC8G
+# CSqGSIb3DQEJBDEiBCDh92n58T3EjdswVTndDNEVuihWbKz9Y1sFyIg6qvf2vjAN
+# BgkqhkiG9w0BAQEFAASCAgCaBFb/MCGVdLxZvPC4aBs/X6wT+LepSIUPX5ii6wFc
+# KJWk38tQFduPRGGVxzGNBjYZSQpyJzGqBwl0+i4OdajEJI8jdzfqlZ3sMhZLceQJ
+# /i1pEhu1hreCbooarOSQj1F12vfXLq0ShD/l4o8xlLBFOLtb6VLu7kegcJiRUrNN
+# N0XTvpassE1tUuHvB4GxKOvOw9t4zJKuODRAX2CjVrmLvdC6lFf4rdRAXoEbxund
+# H9aNE2gEobIw4IbGOTa885h+P4wyhI3H7a7Dq6U0YiXFvkCMvaYETnwUYNJiz8dR
+# uVDBqwc7aeUQLlAUdOcsCV6qU/Km7pRGxP/60739+Iq5rMmJp+8gM5ushzHiW/vH
+# FZ6Pukm4L77wByQ9kP6XXe2MZayamET6PZ7sZHC+0v+pmylduso0yUrec6hw7tMY
+# I39NtdY182JSn30PpV6C1EJXHyTpV/QsxIE5BpTQIvCwuoQmDxCP3Yp4YRpc+gDW
+# t5nsolLfF1Pg2Oe6C4ZWyhoONWgJj64KvgGuAFnc8dkfYZj2Y6P9Kfi52H2OyuuX
+# iTa7QkOh3JjXhCGU/2Ize4SvvDtjJ6D2s/S+VpLa+tcheOC27cGPs577IMbVo0Mt
+# y8UqjTrrZqC6GtSdIbwQbs2fDGR1VQLcEtPhBAZ2r2JsHtzcVUX2m0Dwlv9xGVPS
+# SQ==
 # SIG # End signature block
